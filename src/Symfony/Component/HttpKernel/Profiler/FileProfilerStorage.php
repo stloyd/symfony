@@ -50,16 +50,16 @@ class FileProfilerStorage implements ProfilerStorageInterface
      */
     public function find($ip, $url, $limit, $method, $start = null, $end = null)
     {
-        $file = $this->getIndexFilename();
+        $result = array();
 
-        if (!file_exists($file)) {
-            return array();
+        try {
+            $file = new \SplFileObject($this->getIndexFilename());
+        } catch (\RuntimeException $e) {
+            return $result;
         }
 
-        $file = fopen($file, 'r');
-        fseek($file, 0, SEEK_END);
+        $file->fseek(0, SEEK_END);
 
-        $result = array();
         while (count($result) < $limit && $line = $this->readLineFromFile($file)) {
             list($csvToken, $csvIp, $csvMethod, $csvUrl, $csvTime, $csvParent) = str_getcsv($line);
 
@@ -87,7 +87,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
             );
         }
 
-        fclose($file);
+        $file->fclose();
 
         return array_values($result);
     }
@@ -138,7 +138,6 @@ class FileProfilerStorage implements ProfilerStorageInterface
             }
         }
 
-        // Store profile
         $data = array(
             'token'    => $profile->getToken(),
             'parent'   => $profile->getParentToken(),
@@ -150,25 +149,33 @@ class FileProfilerStorage implements ProfilerStorageInterface
             'time'     => $profile->getTime(),
         );
 
-        if (false === file_put_contents($file, serialize($data))) {
+        // Store profile
+        $file = new \SplFileObject($file, 'w');
+        if (null === $file->fwrite(serialize($data))) {
             return false;
         }
 
         if (!$profileIndexed) {
             // Add to index
-            if (false === $file = fopen($this->getIndexFilename(), 'a')) {
+            try {
+                $file = new \SplFileObject($this->getIndexFilename(), 'a');
+                if (false === $file->flock(LOCK_EX)) {
+                    return false;
+                }
+
+                $file->fputcsv(array(
+                    $profile->getToken(),
+                    $profile->getIp(),
+                    $profile->getMethod(),
+                    $profile->getUrl(),
+                    $profile->getTime(),
+                    $profile->getParentToken(),
+                ));
+
+                $file = null;
+            } catch (\RuntimeException $e) {
                 return false;
             }
-
-            fputcsv($file, array(
-                $profile->getToken(),
-                $profile->getIp(),
-                $profile->getMethod(),
-                $profile->getUrl(),
-                $profile->getTime(),
-                $profile->getParentToken(),
-            ));
-            fclose($file);
         }
 
         return true;
@@ -205,30 +212,32 @@ class FileProfilerStorage implements ProfilerStorageInterface
      *
      * This function automatically skips the empty lines and do not include the line return in result value.
      *
-     * @param resource $file The file resource, with the pointer placed at the end of the line to read
+     * @param \SplFileObject $file The file object, with the pointer placed at the end of the line to read
      *
      * @return mixed A string representing the line or null if beginning of file is reached
      */
-    protected function readLineFromFile($file)
+    protected function readLineFromFile(\SplFileObject $file)
     {
-        $line = '';
-        $position = ftell($file);
+            return false;
+        $position = $file->ftell();
 
         if (0 === $position) {
             return null;
         }
 
+        $line = '';
+
         while (true) {
             $chunkSize = min($position, 1024);
             $position -= $chunkSize;
-            fseek($file, $position);
+            $file->fseek($position);
 
             if (0 === $chunkSize) {
                 // bof reached
                 break;
             }
 
-            $buffer = fread($file, $chunkSize);
+            $buffer = $file->fread($chunkSize);
 
             if (false === ($upTo = strrpos($buffer, "\n"))) {
                 $line = $buffer.$line;
@@ -237,7 +246,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
 
             $position += $upTo;
             $line = substr($buffer, $upTo + 1).$line;
-            fseek($file, max(0, $position), SEEK_SET);
+            $file->fseek(max(0, $position), SEEK_SET);
 
             if ('' !== $line) {
                 break;
