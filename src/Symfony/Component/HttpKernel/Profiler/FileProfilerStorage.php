@@ -48,25 +48,23 @@ class FileProfilerStorage implements ProfilerStorageInterface
      */
     public function find($ip, $url, $limit, $method)
     {
-        $file = $this->getIndexFilename();
-
-        if (!file_exists($file)) {
-            return array();
-        }
-
-        $file = fopen($file, 'r');
-        fseek($file, 0, SEEK_END);
-
         $result = array();
 
-        while ($limit > 0) {
+        try {
+            $file = new \SplFileObject($this->getIndexFilename());
+        } catch (\RuntimeException $e) {
+            return $result;
+        }
+
+        $file->fseek(0, SEEK_END);
+        while (0 < $limit) {
             $line = $this->readLineFromFile($file);
 
             if (false === $line) {
                 break;
             }
 
-            if ($line === '') {
+            if ('' === $line) {
                 continue;
             }
 
@@ -76,7 +74,7 @@ class FileProfilerStorage implements ProfilerStorageInterface
                 continue;
             }
 
-            $row = array(
+            $result[] = array(
                 'token'  => $csvToken,
                 'ip'     => $csvIp,
                 'method' => $csvMethod,
@@ -85,11 +83,8 @@ class FileProfilerStorage implements ProfilerStorageInterface
                 'parent' => $csvParent,
             );
 
-            $result[] = $row;
             --$limit;
         }
-
-        fclose($file);
 
         return $result;
     }
@@ -137,7 +132,6 @@ class FileProfilerStorage implements ProfilerStorageInterface
             mkdir($dir, 0777, true);
         }
 
-        // Store profile
         $data = array(
             'token'    => $profile->getToken(),
             'parent'   => $profile->getParentToken(),
@@ -149,24 +143,33 @@ class FileProfilerStorage implements ProfilerStorageInterface
             'time'     => $profile->getTime(),
         );
 
-        if (false === file_put_contents($file, serialize($data))) {
+        // Store profile
+        $file = new \SplFileObject($file, 'w');
+        if (null === $file->fwrite(serialize($data))) {
             return false;
         }
 
         // Add to index
-        if (false === $file = fopen($this->getIndexFilename(), 'a')) {
+        try {
+            $file = new \SplFileObject($this->getIndexFilename(), 'a');
+            if (false === $file->flock(LOCK_EX)) {
+                return false;
+            }
+
+            $file->fputcsv(array(
+                $profile->getToken(),
+                $profile->getIp(),
+                $profile->getMethod(),
+                $profile->getUrl(),
+                $profile->getTime(),
+                $profile->getParentToken(),
+            ));
+
+            $file->flock(LOCK_UN);
+        } catch (\RuntimeException $e) {
             return false;
         }
 
-        fputcsv($file, array(
-            $profile->getToken(),
-            $profile->getIp(),
-            $profile->getMethod(),
-            $profile->getUrl(),
-            $profile->getTime(),
-            $profile->getParentToken(),
-        ));
-        fclose($file);
 
         return true;
     }
@@ -200,40 +203,38 @@ class FileProfilerStorage implements ProfilerStorageInterface
      *
      * This function automatically skips the empty lines and do not include the line return in result value.
      *
-     * @param resource $file The file resource, with the pointer placed at the end of the line to read
+     * @param \SplFileObject $file The file object, with the pointer placed at the end of the line to read
      *
      * @return mixed A string representating the line or FALSE if beginning of file is reached
      */
-    protected function readLineFromFile($file)
+    protected function readLineFromFile(\SplFileObject $file)
     {
-        if (ftell($file) === 0) {
+        if (0 === $file->ftell()) {
             return false;
         }
 
-        fseek($file, -1, SEEK_CUR);
+        $file->fseek(-1, SEEK_CUR);
         $str = '';
 
         while (true) {
-            $char = fgetc($file);
-
-            if ($char === "\n") {
+            $char = $file->fgetc();
+            if ("\n" === $char) {
                 // Leave the file with cursor before the line return
-                fseek($file, -1, SEEK_CUR);
+                $file->fseek(-1, SEEK_CUR);
                 break;
             }
 
             $str = $char.$str;
-
-            if (ftell($file) === 1) {
+            if (1 === $file->ftell($file)) {
                 // All file is read, so we move cursor to the position 0
-                fseek($file, -1, SEEK_CUR);
+                $file->fseek(-1, SEEK_CUR);
                 break;
             }
 
-            fseek($file, -2, SEEK_CUR);
+            $file->fseek(-2, SEEK_CUR);
         }
 
-        return $str === '' ? $this->readLineFromFile($file) : $str;
+        return '' === $str ? $this->readLineFromFile($file) : $str;
     }
 
     protected function createProfileFromData($token, $data, $parent = null)
