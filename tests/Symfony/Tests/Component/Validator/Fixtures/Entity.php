@@ -23,6 +23,7 @@ class Entity extends EntityParent implements EntityInterface
      *   "bar" = @Assert\Min(5)
      * })
      * @Assert\Choice(choices={"A", "B"}, message="Must be one of %choices%")
+     * @Assert\Regex(pattern="/^[a-z]/i", match="false")
      */
     protected $firstName;
     protected $lastName;

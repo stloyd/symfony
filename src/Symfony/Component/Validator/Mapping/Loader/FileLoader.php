@@ -52,7 +52,9 @@ abstract class FileLoader implements LoaderInterface
      *                        qualified class name
      * @param array $options The constraint options
      *
-     * @return Constraint
+     * @return \Symfony\Component\Validator\Constraint
+     *
+     * @throws MappingException if the namespace prefix is undefined
      */
     protected function newConstraint($name, $options)
     {
@@ -71,5 +73,25 @@ abstract class FileLoader implements LoaderInterface
         }
 
         return new $className($options);
+    }
+
+    protected function translateValue($value)
+    {
+        if (is_string($value)) {
+            switch (trim(strtolower($value))) {
+                case 'null':
+                    $value = null;
+                    break;
+                case 'false':
+                    $value = false;
+                    break;
+                case 'true':
+                    $value = true;
+                    break;
+            }
+            var_dump($value);
+        }
+
+        return $value;
     }
 }

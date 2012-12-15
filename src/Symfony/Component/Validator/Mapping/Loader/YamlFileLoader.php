@@ -18,7 +18,7 @@ class YamlFileLoader extends FileLoader
 {
     /**
      * An array of YAML class descriptions
-     * @val array
+     * @var array
      */
     protected $classes = null;
 
@@ -111,7 +111,7 @@ class YamlFileLoader extends FileLoader
                     $childNodes = $this->parseNodes($childNodes);
                 }
 
-                $values[$name] = $childNodes;
+                $values[$name] = $this->translateValue($childNodes);
             }
         }
 

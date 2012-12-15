@@ -74,6 +74,13 @@
           <value>B</value>
         </option>
       </constraint>
+
+      <!-- Another constraint with options -->
+      <constraint name="Regex">
+        <option name="pattern">/^[a-z]/i</option>
+        <!-- Option with boolean value -->
+        <option name="match">false</option>
+      </constraint>
     </property>
 
     <!-- GETTER CONSTRAINTS -->

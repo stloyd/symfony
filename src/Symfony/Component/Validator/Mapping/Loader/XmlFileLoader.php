@@ -18,7 +18,7 @@ class XmlFileLoader extends FileLoader
 {
     /**
      * An array of SimpleXMLElement instances.
-     * @val array
+     * @var array
      */
     protected $classes = null;
 
@@ -74,7 +74,7 @@ class XmlFileLoader extends FileLoader
     /**
      * Parses a collection of "constraint" XML nodes.
      *
-     * @param SimpleXMLElement $nodes The XML nodes
+     * @param \SimpleXMLElement $nodes The XML nodes
      *
      * @return array The Constraint instances
      */
@@ -108,7 +108,7 @@ class XmlFileLoader extends FileLoader
     /**
      * Parses a collection of "value" XML nodes.
      *
-     * @param SimpleXMLElement $nodes The XML nodes
+     * @param \SimpleXMLElement $nodes The XML nodes
      *
      * @return array The values
      */
@@ -142,7 +142,7 @@ class XmlFileLoader extends FileLoader
     /**
      * Parses a collection of "option" XML nodes.
      *
-     * @param SimpleXMLElement $nodes The XML nodes
+     * @param \SimpleXMLElement $nodes The XML nodes
      *
      * @return array The options
      */
@@ -163,7 +163,7 @@ class XmlFileLoader extends FileLoader
                 $value = trim($node);
             }
 
-            $options[(string) $node['name']] = $value;
+            $options[(string) $node['name']] = $this->translateValue($value);
         }
 
         return $options;
@@ -174,7 +174,7 @@ class XmlFileLoader extends FileLoader
      *
      * @param string $file Path of file
      *
-     * @return SimpleXMLElement
+     * @return \SimpleXMLElement
      *
      * @throws MappingException
      */

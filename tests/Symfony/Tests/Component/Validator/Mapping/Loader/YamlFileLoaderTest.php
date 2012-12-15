@@ -20,6 +20,7 @@ use Symfony\Component\Validator\Constraints\Collection;
 use Symfony\Component\Validator\Constraints\NotNull;
 use Symfony\Component\Validator\Constraints\Min;
 use Symfony\Component\Validator\Constraints\Choice;
+use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Mapping\Loader\YamlFileLoader;
 use Symfony\Tests\Component\Validator\Fixtures\ConstraintA;
@@ -84,6 +85,10 @@ class YamlFileLoaderTest extends \PHPUnit_Framework_TestCase
         $expected->addPropertyConstraint('firstName', new Choice(array(
             'message' => 'Must be one of %choices%',
             'choices' => array('A', 'B'),
+        )));
+        $expected->addPropertyConstraint('firstName', new Regex(array(
+            'pattern' => '/^[a-z]/i',
+            'match'   => false,
         )));
         $expected->addGetterConstraint('lastName', new NotNull());
 

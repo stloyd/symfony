@@ -39,6 +39,8 @@ Symfony\Tests\Component\Validator\Fixtures\Entity:
               - Min: 5
       # Constraint with options
       - Choice: { choices: [A, B], message: Must be one of %choices% }
+      # Another constraint with options
+      - Regex: { pattern: '/^[a-z]/i', match: false }
 
   getters:
     lastName:

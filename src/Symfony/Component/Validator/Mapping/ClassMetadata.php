@@ -283,7 +283,7 @@ class ClassMetadata extends ElementMetadata
     /**
      * Returns a ReflectionClass instance for this class.
      *
-     * @return ReflectionClass
+     * @return \ReflectionClass
      */
     public function getReflectionClass()
     {
