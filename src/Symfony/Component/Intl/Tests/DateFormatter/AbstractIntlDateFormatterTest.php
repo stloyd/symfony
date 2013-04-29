@@ -842,11 +842,13 @@ abstract class AbstractIntlDateFormatterTest extends \PHPUnit_Framework_TestCase
 
         if (version_compare(PHP_VERSION, '5.5.0-dev', '>=')) {
             $formatter->setTimeZone($timeZoneId);
+
+            $this->assertEquals($expectedTimeZoneId, $formatter->getTimeZone());
         } else {
             $formatter->setTimeZoneId($timeZoneId);
-        }
 
-        $this->assertEquals($expectedTimeZoneId, $formatter->getTimeZoneId());
+            $this->assertEquals($expectedTimeZoneId, $formatter->getTimeZoneId());
+        }
     }
 
     public function setTimeZoneIdProvider()
