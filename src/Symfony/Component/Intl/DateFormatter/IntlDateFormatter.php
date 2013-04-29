@@ -384,17 +384,15 @@ class IntlDateFormatter
     }
 
     /**
-     * Not supported. Returns the formatter's timezone
+     * This method was added in PHP 5.5 as replacement for `getTimeZoneId()`
      *
      * @return mixed The timezone used by the formatter
      *
      * @see http://www.php.net/manual/en/intldateformatter.gettimezone.php
-     *
-     * @throws MethodNotImplementedException
      */
     public function getTimeZone()
     {
-        throw new MethodNotImplementedException(__METHOD__);
+        return $this->getTimeZoneId();
     }
 
     /**
@@ -546,10 +544,6 @@ class IntlDateFormatter
             if (version_compare(PHP_VERSION, '5.5.0-dev', '>=')) {
                 $timeZoneId = date_default_timezone_get();
             } else {
-                // TODO: changes were made to ext/intl in PHP 5.4.4 release that need to be investigated since it will
-                // use ini's date.timezone when the time zone is not provided. As a not well tested workaround, uses UTC.
-                // See the first two items of the commit message for more information:
-                // https://github.com/php/php-src/commit/eb346ef0f419b90739aadfb6cc7b7436c5b521d9
                 $timeZoneId = getenv('TZ') ?: 'UTC';
             }
 
@@ -570,11 +564,11 @@ class IntlDateFormatter
 
         try {
             $this->dateTimeZone = new \DateTimeZone($timeZoneId);
+            $this->timeZoneId   = $timeZone;
         } catch (\Exception $e) {
             $this->dateTimeZone = new \DateTimeZone('UTC');
+            $this->timeZoneId   = 'UTC';
         }
-
-        $this->timeZoneId = $timeZone;
 
         return true;
     }
