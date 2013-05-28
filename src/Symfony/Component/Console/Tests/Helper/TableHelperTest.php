@@ -79,6 +79,36 @@ class TableHelperTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $this->getOutputContent($output));
     }
 
+    public function testRenderWithFormatters()
+    {
+        $output = new StreamOutput($this->stream, StreamOutput::VERBOSITY_NORMAL);
+
+        $table = new TableHelper();
+        $table
+            ->setHeaders(array('ISBN', '<error>Title</error>'))
+            ->setRows(array(
+                array('<error>99921-58-10-7</error>', 'Divine Comedy', 'Dante Alighieri'),
+                array('9971-5-0210-0'),
+                array('960-425-059-0', '<error>The Lord of the Rings</error>', 'J. R. R. Tolkien'),
+                array('80-902734-1-6', 'And Then There Were None', '<error>Agatha Christie</error>'),
+            ))
+            ->setLayout(TableHelper::LAYOUT_DEFAULT)
+        ;
+        $table->render($output);
+        
+        $expected = "+---------------+--------------------------+------------------+
+| ISBN          | \033[37;41mTitle\033[0m                    |                  |
++---------------+--------------------------+------------------+
+| \033[37;41m99921-58-10-7\033[0m | Divine Comedy            | Dante Alighieri  |
+| 9971-5-0210-0 |                          |                  |
+| 960-425-059-0 | \033[37;41mThe Lord of the Rings\033[0m    | J. R. R. Tolkien |
+| 80-902734-1-6 | And Then There Were None | \033[37;41mAgatha Christie\033[0m  |
++---------------+--------------------------+------------------+
+";
+
+        $this->assertEquals($expected, $this->getOutputContent($output));
+    }
+
     public function testRenderProvider()
     {
         return array(
@@ -170,27 +200,6 @@ TABLE
                 array(),
                 TableHelper::LAYOUT_DEFAULT,
                 '',
-            ),
-            array(
-                array('ISBN', '<error>Title</error>'),
-                array(
-                    array('<error>99921-58-10-7</error>', 'Divine Comedy', 'Dante Alighieri'),
-                    array('9971-5-0210-0'),
-                    array('960-425-059-0', '<error>The Lord of the Rings</error>', 'J. R. R. Tolkien'),
-                    array('80-902734-1-6', 'And Then There Were None', '<error>Agatha Christie</error>'),
-                ),
-                TableHelper::LAYOUT_DEFAULT,
-<<<TABLE
-+---------------+--------------------------+------------------+
-| ISBN          | Title                    |                  |
-+---------------+--------------------------+------------------+
-| 99921-58-10-7 | Divine Comedy            | Dante Alighieri  |
-| 9971-5-0210-0 |                          |                  |
-| 960-425-059-0 | The Lord of the Rings    | J. R. R. Tolkien |
-| 80-902734-1-6 | And Then There Were None | Agatha Christie  |
-+---------------+--------------------------+------------------+
-
-TABLE
             ),
         );
     }

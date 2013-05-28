@@ -12,7 +12,6 @@
 namespace Symfony\Component\Console\Helper;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use InvalidArgumentException;
 
 /**
  * Provides helpers to display table output.
@@ -109,7 +108,7 @@ class TableHelper extends Helper
                 break;
 
             default:
-                throw new InvalidArgumentException(sprintf('Invalid table layout "%s".', $layout));
+                throw new \InvalidArgumentException(sprintf('Invalid table layout "%s".', $layout));
                 break;
         };
 
@@ -282,13 +281,22 @@ class TableHelper extends Helper
     public function render(OutputInterface $output)
     {
         $this->output = $output;
+        $formatter = $output->getFormatter();
+
+        foreach ($this->headers as $column => $cell) {
+            $this->headers[$column] = $formatter->format($cell);
+        }
 
         $this->renderRowSeparator();
         $this->renderRow($this->headers, $this->cellHeaderFormat);
         if (!empty($this->headers)) {
             $this->renderRowSeparator();
         }
-        foreach ($this->rows as $row) {
+        foreach ($this->rows as $key => &$row) {
+            foreach ($row as $column => $cell) {
+                $this->rows[$key][$column] = $formatter->format($cell);
+            }
+
             $this->renderRow($row, $this->cellRowFormat);
         }
         if (!empty($this->rows)) {
@@ -374,7 +382,7 @@ class TableHelper extends Helper
     /**
      * Gets number of columns for this table.
      *
-     * @return int
+     * @return integer
      */
     private function getNumberOfColumns()
     {
@@ -396,7 +404,7 @@ class TableHelper extends Helper
      *
      * @param integer $column
      *
-     * @return int
+     * @return integer
      */
     private function getColumnWidth($column)
     {
@@ -419,7 +427,7 @@ class TableHelper extends Helper
      * @param array   $row
      * @param integer $column
      *
-     * @return int
+     * @return integer
      */
     private function getCellWidth(array $row, $column)
     {
