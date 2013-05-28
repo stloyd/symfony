@@ -83,6 +83,21 @@ class CrawlerTest extends \PHPUnit_Framework_TestCase
     /**
      * @covers Symfony\Component\DomCrawler\Crawler::addHtmlContent
      */
+    public function testAddHtmlContentCharsetUsingNotDefaultCharset()
+    {
+        if (!function_exists('mb_convert_encoding')) {
+            $this->markTestSkipped('The "Multibyte String Functions" extension is not available');
+        }
+
+        $crawler = new Crawler();
+        $crawler->addHtmlContent(file_get_contents(__DIR__.'/Fixtures/iso-8859-15.html'), 'ISO-8859-15');
+
+        $this->assertEquals(mb_convert_encoding('ùúûüýþÿ', 'ISO-8859-15', 'UTF-8'), $crawler->filterXPath('//p')->text());
+    }
+
+    /**
+     * @covers Symfony\Component\DomCrawler\Crawler::addHtmlContent
+     */
     public function testAddHtmlContentInvalidBaseTag()
     {
         $crawler = new Crawler(null, 'http://symfony.com');
@@ -236,6 +251,7 @@ EOF
      */
     public function testAddNodes()
     {
+        $list = array();
         foreach ($this->createNodeList() as $node) {
             $list[] = $node;
         }

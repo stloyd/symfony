@@ -28,6 +28,11 @@ class Crawler extends \SplObjectStorage
     private $uri;
 
     /**
+     * @var string The current charset of added content
+     */
+    private $charset;
+
+    /**
      * Constructor.
      *
      * @param mixed  $node A Node to use as the base for the crawling
@@ -126,6 +131,8 @@ class Crawler extends \SplObjectStorage
      */
     public function addHtmlContent($content, $charset = 'UTF-8')
     {
+        $this->charset = $charset;
+
         $current = libxml_use_internal_errors(true);
         $disableEntities = libxml_disable_entity_loader(true);
 
@@ -168,6 +175,8 @@ class Crawler extends \SplObjectStorage
      */
     public function addXmlContent($content, $charset = 'UTF-8')
     {
+        $this->charset = $charset;
+
         $current = libxml_use_internal_errors(true);
         $disableEntities = libxml_disable_entity_loader(true);
 
@@ -377,6 +386,8 @@ class Crawler extends \SplObjectStorage
      *
      * @return Crawler A Crawler instance with the previous sibling nodes
      *
+     * @throws \InvalidArgumentException When current node is empty
+     *
      * @api
      */
     public function previousAll()
@@ -520,7 +531,7 @@ class Crawler extends \SplObjectStorage
      */
     public function filterXPath($xpath)
     {
-        $document = new \DOMDocument('1.0', 'UTF-8');
+        $document = new \DOMDocument('1.0', $this->charset ?: 'UTF-8');
         $root = $document->appendChild($document->createElement('_root'));
         foreach ($this as $node) {
             $root->appendChild($document->importNode($node, true));
