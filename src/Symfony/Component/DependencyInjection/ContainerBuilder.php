@@ -489,6 +489,10 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
                 throw $e;
             }
 
+            if ($definition->isSynthetic() && $definition->isSynchronized()) {
+                return null;
+            }
+
             $this->loading[$id] = true;
 
             try {
@@ -1054,7 +1058,7 @@ class ContainerBuilder extends Container implements TaggedContainerInterface
     public function findTags()
     {
         $tags = array();
-        foreach ($this->getDefinitions() as $id => $definition) {
+        foreach ($this->getDefinitions() as $definition) {
             $tags = array_merge(array_keys($definition->getTags()), $tags);
         }
 

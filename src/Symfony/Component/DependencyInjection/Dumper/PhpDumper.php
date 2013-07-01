@@ -135,8 +135,8 @@ class PhpDumper extends Dumper
     /**
      * Generates Service local temp variables.
      *
-     * @param string $cId
-     * @param string $definition
+     * @param string     $cId
+     * @param Definition $definition
      *
      * @return string
      */
@@ -605,10 +605,12 @@ EOF;
         $definitions = $this->container->getDefinitions();
         ksort($definitions);
         foreach ($definitions as $id => $definition) {
-            if ($definition->isPublic()) {
-                $publicServices .= $this->addService($id, $definition);
-            } else {
-                $privateServices .= $this->addService($id, $definition);
+            if (!($definition->isSynthetic() && $definition->isSynchronized())) {
+                if ($definition->isPublic()) {
+                    $publicServices .= $this->addService($id, $definition);
+                } else {
+                    $privateServices .= $this->addService($id, $definition);
+                }
             }
 
             $synchronizers .= $this->addServiceSynchronizer($id, $definition);
@@ -1050,7 +1052,7 @@ EOF;
      *
      * @param Definition $definition
      *
-     * @return array
+     * @return Definition[]
      */
     private function getInlinedDefinitions(Definition $definition)
     {
@@ -1074,7 +1076,7 @@ EOF;
      *
      * @param array $arguments
      *
-     * @return array
+     * @return Definition[]
      */
     private function getDefinitionsFromArguments(array $arguments)
     {
