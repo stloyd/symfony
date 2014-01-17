@@ -87,6 +87,9 @@ class DefaultAuthenticationFailureHandler implements AuthenticationFailureHandle
 
         $request->getSession()->set(SecurityContextInterface::AUTHENTICATION_ERROR, $exception);
 
-        return $this->httpUtils->createRedirectResponse($request, $this->options['failure_path']);
+        $response = $this->httpUtils->createRedirectResponse($request, $this->options['failure_path']);
+        $response->headers->set('Referer', $request->headers->get('Referer'));
+
+        return $response;
     }
 }
