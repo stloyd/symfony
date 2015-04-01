@@ -32,7 +32,8 @@ class NotNullValidator extends ConstraintValidator
         }
 
         if (null === $value) {
-            $this->context->addViolation($constraint->message);
+            $this->context->buildViolation($constraint->message)
+                ->addViolation();
         }
     }
 }

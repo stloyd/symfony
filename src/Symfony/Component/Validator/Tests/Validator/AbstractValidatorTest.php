@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\GroupSequence;
 use Symfony\Component\Validator\Constraints\Valid;
 use Symfony\Component\Validator\ConstraintViolationInterface;
-use Symfony\Component\Validator\ExecutionContextInterface;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Tests\Fixtures\Entity;
 use Symfony\Component\Validator\Tests\Fixtures\FakeMetadataFactory;
@@ -820,24 +820,6 @@ abstract class AbstractValidatorTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Cannot be UnsupportedMetadataException for BC with Symfony < 2.5.
-     *
-     * @expectedException \Symfony\Component\Validator\Exception\ValidatorException
-     * @group legacy
-     */
-    public function testLegacyValidatePropertyFailsIfPropertiesNotSupported()
-    {
-        $this->iniSet('error_reporting', -1 & ~E_USER_DEPRECATED);
-
-        // $metadata does not implement PropertyMetadataContainerInterface
-        $metadata = $this->getMock('Symfony\Component\Validator\MetadataInterface');
-
-        $this->metadataFactory->addMetadataForValue('VALUE', $metadata);
-
-        $this->validateProperty('VALUE', 'someProperty');
-    }
-
-    /**
      * https://github.com/symfony/symfony/issues/11604
      */
     public function testValidatePropertyWithoutConstraints()
@@ -947,24 +929,6 @@ abstract class AbstractValidatorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('Bernhard', $violations[0]->getInvalidValue());
         $this->assertNull($violations[0]->getPlural());
         $this->assertNull($violations[0]->getCode());
-    }
-
-    /**
-     * Cannot be UnsupportedMetadataException for BC with Symfony < 2.5.
-     *
-     * @expectedException \Symfony\Component\Validator\Exception\ValidatorException
-     * @group legacy
-     */
-    public function testLegacyValidatePropertyValueFailsIfPropertiesNotSupported()
-    {
-        $this->iniSet('error_reporting', -1 & ~E_USER_DEPRECATED);
-
-        // $metadata does not implement PropertyMetadataContainerInterface
-        $metadata = $this->getMock('Symfony\Component\Validator\MetadataInterface');
-
-        $this->metadataFactory->addMetadataForValue('VALUE', $metadata);
-
-        $this->validatePropertyValue('VALUE', 'someProperty', 'someValue');
     }
 
     /**

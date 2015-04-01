@@ -69,7 +69,7 @@ interface ConstraintViolationInterface
      *
      * @api
      */
-    public function getMessageParameters();
+    public function getParameters();
 
     /**
      * Returns a number for pluralizing the violation message.
@@ -87,7 +87,7 @@ interface ConstraintViolationInterface
      *
      * @return int|null The number to use to pluralize of the message.
      */
-    public function getMessagePluralization();
+    public function getPlural();
 
     /**
      * Returns the root element of the validation.

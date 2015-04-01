@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\RuntimeException;
@@ -67,32 +66,18 @@ class EmailValidator extends ConstraintValidator
             $strictValidator = new \Egulias\EmailValidator\EmailValidator();
 
             if (!$strictValidator->isValid($value, false, true)) {
-                if ($this->context instanceof ExecutionContextInterface) {
-                    $this->context->buildViolation($constraint->message)
-                        ->setParameter('{{ value }}', $this->formatValue($value))
-                        ->setCode(Email::INVALID_FORMAT_ERROR)
-                        ->addViolation();
-                } else {
-                    $this->buildViolation($constraint->message)
-                        ->setParameter('{{ value }}', $this->formatValue($value))
-                        ->setCode(Email::INVALID_FORMAT_ERROR)
-                        ->addViolation();
-                }
-
-                return;
-            }
-        } elseif (!preg_match('/.+\@.+\..+/', $value)) {
-            if ($this->context instanceof ExecutionContextInterface) {
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ value }}', $this->formatValue($value))
                     ->setCode(Email::INVALID_FORMAT_ERROR)
                     ->addViolation();
-            } else {
-                $this->buildViolation($constraint->message)
-                    ->setParameter('{{ value }}', $this->formatValue($value))
-                    ->setCode(Email::INVALID_FORMAT_ERROR)
-                    ->addViolation();
+
+                return;
             }
+        } elseif (!preg_match('/.+\@.+\..+/', $value)) {
+            $this->context->buildViolation($constraint->message)
+                ->setParameter('{{ value }}', $this->formatValue($value))
+                ->setCode(Email::INVALID_FORMAT_ERROR)
+                ->addViolation();
 
             return;
         }
@@ -102,34 +87,20 @@ class EmailValidator extends ConstraintValidator
         // Check for host DNS resource records
         if ($constraint->checkMX) {
             if (!$this->checkMX($host)) {
-                if ($this->context instanceof ExecutionContextInterface) {
-                    $this->context->buildViolation($constraint->message)
-                        ->setParameter('{{ value }}', $this->formatValue($value))
-                        ->setCode(Email::MX_CHECK_FAILED_ERROR)
-                        ->addViolation();
-                } else {
-                    $this->buildViolation($constraint->message)
-                        ->setParameter('{{ value }}', $this->formatValue($value))
-                        ->setCode(Email::MX_CHECK_FAILED_ERROR)
-                        ->addViolation();
-                }
+                $this->context->buildViolation($constraint->message)
+                    ->setParameter('{{ value }}', $this->formatValue($value))
+                    ->setCode(Email::MX_CHECK_FAILED_ERROR)
+                    ->addViolation();
             }
 
             return;
         }
 
         if ($constraint->checkHost && !$this->checkHost($host)) {
-            if ($this->context instanceof ExecutionContextInterface) {
-                $this->context->buildViolation($constraint->message)
-                    ->setParameter('{{ value }}', $this->formatValue($value))
-                    ->setCode(Email::HOST_CHECK_FAILED_ERROR)
-                    ->addViolation();
-            } else {
-                $this->buildViolation($constraint->message)
-                    ->setParameter('{{ value }}', $this->formatValue($value))
-                    ->setCode(Email::HOST_CHECK_FAILED_ERROR)
-                    ->addViolation();
-            }
+            $this->context->buildViolation($constraint->message)
+                ->setParameter('{{ value }}', $this->formatValue($value))
+                ->setCode(Email::HOST_CHECK_FAILED_ERROR)
+                ->addViolation();
         }
     }
 

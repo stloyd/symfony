@@ -143,10 +143,6 @@ class GenericMetadata implements MetadataInterface
             if ($constraint->traverse) {
                 // Traverse unless the value is not traversable
                 $this->traversalStrategy = TraversalStrategy::IMPLICIT;
-
-                if (!$constraint->deep) {
-                    $this->traversalStrategy |= TraversalStrategy::STOP_RECURSION;
-                }
             } else {
                 $this->traversalStrategy = TraversalStrategy::NONE;
             }
@@ -223,22 +219,5 @@ class GenericMetadata implements MetadataInterface
     public function getTraversalStrategy()
     {
         return $this->traversalStrategy;
-    }
-
-    /**
-     * Exists for compatibility with the deprecated
-     * {@link Symfony\Component\Validator\MetadataInterface}.
-     *
-     * Should not be used.
-     *
-     * Implemented for backward compatibility with Symfony < 2.5.
-     *
-     * @throws BadMethodCallException
-     *
-     * @deprecated since version 2.5, to be removed in 3.0.
-     */
-    public function accept(ValidationVisitorInterface $visitor, $value, $group, $propertyPath)
-    {
-        throw new BadMethodCallException('Not supported.');
     }
 }

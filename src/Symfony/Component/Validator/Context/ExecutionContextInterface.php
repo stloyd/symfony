@@ -59,7 +59,7 @@ use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
  * @since  2.5
  * @author Bernhard Schussek <bschussek@gmail.com>
  */
-interface ExecutionContextInterface extends LegacyExecutionContextInterface
+interface ExecutionContextInterface
 {
     /**
      * Returns a builder for adding a violation with extended information.

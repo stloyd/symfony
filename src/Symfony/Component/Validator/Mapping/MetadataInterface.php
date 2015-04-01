@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Validator\Mapping;
 
-use Symfony\Component\Validator\MetadataInterface as LegacyMetadataInterface;
+use Symfony\Component\Validator\Constraint;
 
 /**
  * A container for validation metadata.
@@ -29,7 +29,7 @@ use Symfony\Component\Validator\MetadataInterface as LegacyMetadataInterface;
  * @see CascadingStrategy
  * @see TraversalStrategy
  */
-interface MetadataInterface extends LegacyMetadataInterface
+interface MetadataInterface
 {
     /**
      * Returns the strategy for cascading objects.
